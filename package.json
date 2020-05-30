@@ -1,0 +1,22 @@
+{
+  "name": "form-validator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ruslanpalagin/form-validator.git"
+  },
+  "author": "Ruslan Palagin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ruslanpalagin/form-validator/issues"
+  },
+  "homepage": "https://github.com/ruslanpalagin/form-validator#readme",
+  "devDependencies": {
+    "jest": "^26.0.1"
+  }
+}
