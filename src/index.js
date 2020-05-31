@@ -39,11 +39,12 @@ class FormValidator {
         let errors = [];
         for (let i = 0; i < fieldRules.length; i += 1) {
             const rule = fieldRules[i];
-            const { validator, params } = this.extractValidator(rule);
-            const validationResult = await validator({ value: formData[fieldName], params, formData, fieldName, language });
+            const { validator, params, message } = this.extractValidator(rule);
+            const validationArgs = { value: formData[fieldName], params, formData, fieldName, language, message }
+            const validationResult = await validator(validationArgs);
             if (validationResult !== null) {
                 if (typeof validationResult === "string") {
-                    errors.push({ field: fieldName, message: validationResult });
+                    errors.push({ field: fieldName, message: this.getErrorMessage(validationResult, rule.message, validationArgs) });
                 }
                 if (Array.isArray(validationResult)) {
                     errors = errors.concat(validationResult);
@@ -61,7 +62,7 @@ class FormValidator {
      *   // => errors: [{ field: "users[1].name", message: "Required" }]
      */
     hasMany(rules) {
-        return async (value, options, attributes, fieldName) => {
+        return async ({ value, fieldName }) => {
             const resources = value;
             let allErrors = [];
             for (let i = 0; i < resources.length; i += 1) {
@@ -84,7 +85,7 @@ class FormValidator {
      *   // => errors: [{ field: "product.sku", message: "Required" }]
      */
     hasOne(rules) {
-        return async (value, options, attributes, fieldName) => {
+        return async ({ value, fieldName }) => {
             const resource = value;
             let allErrors = [];
             const { errorsArray = [] } = await this.isValid(resource, rules);
@@ -143,6 +144,16 @@ class FormValidator {
             return { validator, params, message: rule.message };
         }
         return null;
+    }
+
+    getErrorMessage(validationResult, ruleMessage, validationArgs) {
+        if (ruleMessage && typeof ruleMessage === 'string') {
+            return ruleMessage
+        }
+        if (ruleMessage && typeof ruleMessage === 'function') {
+            return ruleMessage(validationArgs)
+        }
+        return validationResult
     }
 }
 
