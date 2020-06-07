@@ -11,12 +11,12 @@ class FormValidator {
      *   const rules = { email: ['required', 'email'] };
      *   isValid(form, rules);
      */
-    async isValid(formData, rules, language) {
+    async isValid(form, rules, language) {
         let errorsArray = [];
         const keys = Object.keys(rules);
         for (let i in keys) {
             const field = keys[i];
-            const { isValid, errors } = await this.isValidField(field, formData, rules[field], language);
+            const { isValid, errors } = await this.isValidField(field, form, rules[field], language);
             if (!isValid) {
                 errorsArray = errorsArray.concat(errors);
             }
@@ -26,7 +26,7 @@ class FormValidator {
             errors[field] = errors[field] || [];
             errors[field].push(message);
         });
-        return { isValid: errorsArray.length === 0, errors, errorsArray };
+        return { isValid: errorsArray.length === 0, errors, errorsArray, form };
     }
 
     /**
@@ -36,6 +36,8 @@ class FormValidator {
      *   isValidField('email', form, ['required', 'email']);
      */
     async isValidField(fieldName, formData, fieldRules = [], language = this.language) {
+        fieldRules = Array.isArray(fieldRules) ? fieldRules : [fieldRules]
+
         let errors = [];
         for (let i = 0; i < fieldRules.length; i += 1) {
             const rule = fieldRules[i];

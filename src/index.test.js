@@ -78,6 +78,15 @@ describe("formValidator", () => {
             expect(errors[0].field).toEqual('users[0].email')
             expect(errors[0].message).toEqual('Required')
         });
+        it("should support none arrays as a rule to simplify definitions", async () => {
+            const form = { email: '' }
+            const rules = 'required'
+
+            const { errors } = await formValidator.isValidField('email', form, rules);
+
+            expect(errors[0].field).toEqual('email')
+            expect(errors[0].message).toEqual('Required')
+        });
     });
     describe("isValid", () => {
         it("should handle crazy scenarios", async () => {
@@ -105,9 +114,7 @@ describe("formValidator", () => {
                             formValidator.hasMany({
                                 comments: [
                                     formValidator.hasMany({
-                                        author: [
-                                            formValidator.hasOne({ id: ['required'] })
-                                        ]
+                                        author: formValidator.hasOne({ id: 'required' })
                                     })
                                 ]
                             })
@@ -120,6 +127,11 @@ describe("formValidator", () => {
 
             expect(errors['resources[0].posts[0].comments[0].author.id']).toEqual(['Required'])
         });
+        it("should return original form data as well", async () => {
+            const form = { foo: 'bar' }
+            const { form: returnedForm } = await formValidator.isValid(form, {});
+            expect(returnedForm).toEqual(form)
+        })
     })
     describe("getErrorMessage", () => {
         it("should return validation result if rule.message is falsy", async () => {
