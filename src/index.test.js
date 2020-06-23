@@ -1,7 +1,7 @@
 const FormValidator = require("./index");
-const rules = require("./defaultRules");
+const validators = require("./defaultValidators");
 
-const formValidator = new FormValidator(rules);
+const formValidator = new FormValidator(validators);
 
 describe("formValidator", () => {
     describe("extractValidator", () => {
