@@ -1,7 +1,7 @@
 
 class FormValidator {
-    constructor(rules = {}, language) {
-        this.rules = rules;
+    constructor(validators = {}, language) {
+        this.validators = validators;
         this.language = language;
     }
     /**
@@ -133,13 +133,13 @@ class FormValidator {
             return { validator: rule, params: [], message: rule.message };
         }
         if (typeof rule === "object") {
-            const validator = this.rules[rule.name];
+            const validator = this.validators[rule.name];
             return { validator, params: rule.params, message: rule.message };
         }
         if (typeof rule === "string") {
             const params = rule.split(":");
             const name = params.shift();
-            const validator = this.rules[name];
+            const validator = this.validators[name];
             if (!validator) {
                 throw new Error(`validator ${rule} not found`)
             }
