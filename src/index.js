@@ -1,5 +1,5 @@
 
-class FormValidator {
+class Validator {
     constructor(validators = {}) {
         this.validators = validators;
     }
@@ -69,7 +69,8 @@ class FormValidator {
             let allErrors = [];
             for (let i = 0; i < resources.length; i += 1) {
                 const resource = resources[i];
-                const { errorsArray = [] } = await this.isValid(resource, schema, context);
+                const itemContext = { ...context, itemIndex: i }
+                const { errorsArray = [] } = await this.isValid(resource, schema, itemContext);
                 for (let j = 0; j < errorsArray.length; j += 1) {
                     errorsArray[j].field = `${fieldName}[${i}].${errorsArray[j].field}`;
                 }
@@ -159,4 +160,4 @@ class FormValidator {
     }
 }
 
-module.exports = FormValidator;
+module.exports = Validator;
