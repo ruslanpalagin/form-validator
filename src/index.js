@@ -1,22 +1,22 @@
 
 class FormValidator {
-    constructor(validators = {}, language) {
+    constructor(validators = {}) {
         this.validators = validators;
-        this.language = language;
     }
     /**
      * @return {{isValid: Boolean, errors: Object, errorsArray: Array}}
      * Example:
      *   const form = { email: 'email@com', password: 'foo' };
-     *   const rules = { email: ['required', 'email'] };
-     *   isValid(form, rules);
+     *   const schema = { email: ['required', 'email'] };
+     *   isValid(form, schema);
      */
-    async isValid(form, rules, language) {
+    async isValid(resource, schema, context = null) {
         let errorsArray = [];
-        const keys = Object.keys(rules);
+        context = context || { rootResource: resource }
+        const keys = Object.keys(schema);
         for (let i in keys) {
             const field = keys[i];
-            const { isValid, errors } = await this.isValidField(field, form, rules[field], language);
+            const { isValid, errors } = await this.isValidField(field, resource, schema[field], context);
             if (!isValid) {
                 errorsArray = errorsArray.concat(errors);
             }
@@ -26,7 +26,7 @@ class FormValidator {
             errors[field] = errors[field] || [];
             errors[field].push(message);
         });
-        return { isValid: errorsArray.length === 0, errors, errorsArray, form };
+        return { isValid: errorsArray.length === 0, errors, errorsArray, resource };
     }
 
     /**
@@ -35,14 +35,14 @@ class FormValidator {
      *   const form = { email: 'email@com', password: 'foo' };
      *   isValidField('email', form, ['required', 'email']);
      */
-    async isValidField(fieldName, formData, fieldRules = [], language = this.language) {
+    async isValidField(fieldName, resource, fieldRules = [], context) {
         fieldRules = Array.isArray(fieldRules) ? fieldRules : [fieldRules]
 
         let errors = [];
         for (let i = 0; i < fieldRules.length; i += 1) {
             const rule = fieldRules[i];
-            const { validator, params, message } = this.extractValidator(rule);
-            const validationArgs = { value: formData[fieldName], params, formData, fieldName, language, message }
+            const { validator, params, message } = this.parseValidator(rule);
+            const validationArgs = { value: resource[fieldName], params, resource, fieldName, message, context }
             const validationResult = await validator(validationArgs);
             if (validationResult !== null) {
                 if (typeof validationResult === "string") {
@@ -59,17 +59,17 @@ class FormValidator {
     /**
      * Example:
      *   const form = { users: [ { name: "foo" }, { name: "" } ] };
-     *   const rules = { users: [formValidator.hasMany({ name: ["required"] })] };
-     *   formValidator.isValid(form, rules);
+     *   const schema = { users: [formValidator.hasMany({ name: ["required"] })] };
+     *   formValidator.isValid(form, schema);
      *   // => errors: [{ field: "users[1].name", message: "Required" }]
      */
-    hasMany(rules) {
-        return async ({ value, fieldName }) => {
+    hasMany(schema) {
+        return async ({ value, fieldName, context }) => {
             const resources = value;
             let allErrors = [];
             for (let i = 0; i < resources.length; i += 1) {
                 const resource = resources[i];
-                const { errorsArray = [] } = await this.isValid(resource, rules);
+                const { errorsArray = [] } = await this.isValid(resource, schema, context);
                 for (let j = 0; j < errorsArray.length; j += 1) {
                     errorsArray[j].field = `${fieldName}[${i}].${errorsArray[j].field}`;
                 }
@@ -82,15 +82,15 @@ class FormValidator {
     /**
      * Example:
      *   const form = { product: { "sku": "foo" } };
-     *   const rules = { product: [formValidator.hasOne({ sku: ["required"] })] };
-     *   formValidator.isValid(form, rules);
+     *   const schema = { product: [formValidator.hasOne({ sku: ["required"] })] };
+     *   formValidator.isValid(form, schema);
      *   // => errors: [{ field: "product.sku", message: "Required" }]
      */
-    hasOne(rules) {
-        return async ({ value, fieldName }) => {
+    hasOne(schema) {
+        return async ({ value, fieldName, context }) => {
             const resource = value;
             let allErrors = [];
-            const { errorsArray = [] } = await this.isValid(resource, rules);
+            const { errorsArray = [] } = await this.isValid(resource, schema, context);
             for (let j = 0; j < errorsArray.length; j += 1) {
                 errorsArray[j].field = `${fieldName}.${errorsArray[j].field}`;
             }
@@ -99,27 +99,27 @@ class FormValidator {
         };
     }
 
-    isBulkObjectResultsValid(collectionOfErrorResults) {
-        for (let i in collectionOfErrorResults) {
-            if (this.isObjectHasErrors(collectionOfErrorResults[i])) {
-                return {
-                    isValid: false,
-                };
-            }
-        }
-        return {
-            isValid: true,
-        };
-    }
-
-    isObjectHasErrors(object) {
-        for (let i in object) {
-            if (object[i] && "length" in object[i] && object[i].length > 0) {
-                return true;
-            }
-        }
-        return false;
-    }
+    // isBulkObjectResultsValid(collectionOfErrorResults) {
+    //     for (let i in collectionOfErrorResults) {
+    //         if (this.isObjectHasErrors(collectionOfErrorResults[i])) {
+    //             return {
+    //                 isValid: false,
+    //             };
+    //         }
+    //     }
+    //     return {
+    //         isValid: true,
+    //     };
+    // }
+    //
+    // isObjectHasErrors(object) {
+    //     for (let i in object) {
+    //         if (object[i] && "length" in object[i] && object[i].length > 0) {
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
 
     getTouchedFromSchema(schema) {
         const touched = {...schema};
@@ -128,7 +128,7 @@ class FormValidator {
     }
 
     /** @private */
-    extractValidator(rule) {
+    parseValidator(rule) {
         if (typeof rule === "function") {
             return { validator: rule, params: [], message: rule.message };
         }
