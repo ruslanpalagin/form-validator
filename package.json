@@ -1,6 +1,6 @@
 {
   "name": "elegant-validator",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Elegant validation for you forms.",
   "main": "src/index.js",
   "scripts": {
