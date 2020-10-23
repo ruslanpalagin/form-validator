@@ -1,11 +1,11 @@
-module.exports = ({ value = "", params }) => {
+module.exports = ({ value = "", params, t }) => {
     const [min, max] = params;
     const { length } = value;
     if (min !== undefined && length < parseInt(min, 10) || length === undefined ) {
-        return `Minimum ${min} symbols required`;
+        return t('length.min', { n: min });
     }
     if (max !== undefined && length > parseInt(max, 10)) {
-        return `Maximum ${max} symbols`;
+        return t('length.max', { n: max });
     }
     return null;
 }

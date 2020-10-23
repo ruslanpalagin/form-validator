@@ -1,5 +1,5 @@
-module.exports = ({ value }) => {
+module.exports = ({ value, t }) => {
     if (!value.includes('@')) {
-        return "Invalid"
+        return t('email')
     }
 }
