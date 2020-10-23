@@ -1,5 +1,5 @@
 const t = (...args) => args
-const validator = require("../../defaultValidators/required");
+const validator = require("../defaultValidators/required");
 
 describe("defaultValidators/required", () => {
     describe("is passing", () => {
