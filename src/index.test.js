@@ -1,7 +1,8 @@
 const FormValidator = require("./index");
 const validators = require("./defaultValidators");
+const messagesEn = require("./defaultMessagesEn");
 
-const resourceValidator = new FormValidator(validators);
+const resourceValidator = new FormValidator(validators, messagesEn);
 
 describe("resourceValidator", () => {
     beforeAll(() => {
@@ -21,7 +22,7 @@ describe("resourceValidator", () => {
             const { validator, params, message } = await resourceValidator.parseValidator({ name: 'required', params: ['foo', 'bar'], message: "Required!" });
             expect(typeof validator).toEqual('function')
             expect(params).toEqual(['foo', 'bar'])
-            expect(message).toBeDefined()
+            expect(message).toEqual("Required!")
         });
         it("should handle callback", async () => {
             const { validator, params } = await resourceValidator.parseValidator(() => "Error message");
@@ -199,8 +200,18 @@ describe("resourceValidator", () => {
     });
     describe("format", () => {
         it("should format", async () => {
-            const message = resourceValidator.format("Foo: %{foo}", {foo: "bar"})
+            const message = resourceValidator.format("Foo: %{foo}", { foo: "bar" })
             expect(message).toEqual("Foo: bar")
+        });
+    });
+    describe("t integration", () => {
+        it("should translate using string message", async () => {
+            const specialResourceValidator = new FormValidator(validators, {
+                required: "Required!!"
+            });
+            const resource = { foo: '' }
+            const { errors } = await specialResourceValidator.isValid(resource, { foo: "required" });
+            expect(errors.foo[0]).toEqual("Required!!")
         });
     });
 });

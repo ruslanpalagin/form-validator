@@ -1,5 +1,5 @@
-module.exports = ({ value }) => {
+module.exports = ({ value, t }) => {
     if (!value && value !== 0) {
-        return "Required"
+        return t('required')
     }
 }

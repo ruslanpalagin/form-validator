@@ -1,8 +1,13 @@
 
 class Validator {
-    constructor(validators = {}) {
+    constructor(validators = {}, messages = {}) {
         this.validators = validators;
+        this.messages = messages;
         this.FORMAT_REGEXP = /(%?)%\{([^\}]+)\}/g
+    }
+
+    t(messageKey, params) {
+        return this.format(this.messages[messageKey], params)
     }
     /**
      * @return {{isValid: Boolean, errors: Object, errorsArray: Array}}
@@ -13,7 +18,8 @@ class Validator {
      */
     async isValid(resource, schema, context = null) {
         let errorsArray = [];
-        context = context || { rootResource: resource }
+        context = context || {}
+        context.rootResource = context.rootResource || resource
         const keys = Object.keys(schema);
         for (let i in keys) {
             const field = keys[i];
@@ -43,7 +49,7 @@ class Validator {
         for (let i = 0; i < fieldRules.length; i += 1) {
             const rule = fieldRules[i];
             const { validator, params, message } = this.parseValidator(rule);
-            const validationArgs = { value: resource[fieldName], params, resource, fieldName, message, context }
+            const validationArgs = { value: resource[fieldName], params, resource, fieldName, message, context, t: this.t.bind(this) }
             const validationResult = await validator(validationArgs);
             if (validationResult !== null) {
                 if (typeof validationResult === "string") {
@@ -101,12 +107,12 @@ class Validator {
         };
     }
 
-    format(str, vals) {
+    format(str, params) {
         return str.replace(this.FORMAT_REGEXP, function(m0, m1, m2) {
           if (m1 === '%') {
             return "%{" + m2 + "}";
           } else {
-            return String(vals[m2]);
+            return String(params[m2]);
           }
         });
     }
