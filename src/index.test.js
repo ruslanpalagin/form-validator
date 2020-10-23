@@ -197,4 +197,10 @@ describe("resourceValidator", () => {
             })
         });
     });
+    describe("format", () => {
+        it("should format", async () => {
+            const message = resourceValidator.format("Foo: %{foo}", {foo: "bar"})
+            expect(message).toEqual("Foo: bar")
+        });
+    });
 });

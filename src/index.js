@@ -2,6 +2,7 @@
 class Validator {
     constructor(validators = {}) {
         this.validators = validators;
+        this.FORMAT_REGEXP = /(%?)%\{([^\}]+)\}/g
     }
     /**
      * @return {{isValid: Boolean, errors: Object, errorsArray: Array}}
@@ -100,27 +101,27 @@ class Validator {
         };
     }
 
-    // isBulkObjectResultsValid(collectionOfErrorResults) {
-    //     for (let i in collectionOfErrorResults) {
-    //         if (this.isObjectHasErrors(collectionOfErrorResults[i])) {
-    //             return {
-    //                 isValid: false,
-    //             };
-    //         }
-    //     }
-    //     return {
-    //         isValid: true,
-    //     };
-    // }
-    //
-    // isObjectHasErrors(object) {
-    //     for (let i in object) {
-    //         if (object[i] && "length" in object[i] && object[i].length > 0) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
+    format(str, vals) {
+        return str.replace(this.FORMAT_REGEXP, function(m0, m1, m2) {
+          if (m1 === '%') {
+            return "%{" + m2 + "}";
+          } else {
+            return String(vals[m2]);
+          }
+        });
+    }
+
+    getValueFromPath(obj, keypath) {
+        if (!v.isObject(obj)) {
+          return undefined;
+        }
+  
+        return v.forEachKeyInKeypath(obj, keypath, function(obj, key) {
+          if (v.isObject(obj)) {
+            return obj[key];
+          }
+        });
+    }
 
     getTouchedFromSchema(schema) {
         const touched = {...schema};
