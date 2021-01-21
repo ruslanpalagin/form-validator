@@ -30,5 +30,10 @@ describe("defaultValidators/required", () => {
                 email({ value: false, t })
             ).toBeDefined()
         });
+        it("for number", async () => {
+            expect(
+                email({ value: 1, t })
+            ).toBeDefined()
+        });
     });
 });

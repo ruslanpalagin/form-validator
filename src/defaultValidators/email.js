@@ -1,5 +1,5 @@
 module.exports = ({ value, t }) => {
-    if (!value || !value.includes('@')) {
+    if (typeof value !== 'string' || !value.includes('@')) {
         return t('email')
     }
 }
