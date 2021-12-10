@@ -4,7 +4,9 @@
   "description": "Elegant validation for your forms.",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest --watch"
+    "test": "jest --watch",
+    "ts-c": "tsc",
+    "ts-check": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
@@ -17,6 +19,7 @@
   },
   "homepage": "https://github.com/ruslanpalagin/form-validator#readme",
   "devDependencies": {
-    "jest": "^26.0.1"
+    "jest": "^26.0.1",
+    "typescript": "^4.5.3"
   }
 }

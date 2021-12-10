@@ -1,5 +1,6 @@
 
-class Validator {
+// @ts-ignore
+class Ev {
     constructor(validators = {}, messages = {}) {
         this.validators = validators;
         this.messages = messages;
@@ -167,4 +168,4 @@ class Validator {
     }
 }
 
-module.exports = Validator;
+module.exports = Ev;
