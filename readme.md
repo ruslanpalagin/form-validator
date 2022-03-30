@@ -5,6 +5,8 @@
 - Supports nesting
 - Friendly to UI frameworks (vue, react, mobile)
 - Async & fast
+- i18n
+- Lightweight, ~1Kb
 
 # Install
 
