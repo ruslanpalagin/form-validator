@@ -3,4 +3,5 @@ module.exports = {
     email: require('./email'),
     length: require('./length'),
     arrayLength: require('./arrayLength'),
+    isNumeric: require('./isNumeric'),
 }
