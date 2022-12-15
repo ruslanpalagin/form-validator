@@ -1,12 +1,12 @@
-# Why
+# Motivation
 
-- Framework agnostic
-- Advanced. Flexible. Scalable.
-- Supports nesting
+- Lightweight, ~1Kb
 - Friendly to UI frameworks (vue, react, mobile)
+- Supports deep nesting
+- Framework agnostic
+- Flexible. Scalable.
 - Async & fast
 - i18n
-- Lightweight, ~1Kb
 
 # Install
 
@@ -19,9 +19,10 @@ npm i elegant-validator
 import ElegantValidator from 'elegant-validator'
 // you may use your own set of validators or add/redefine it in runtime
 import defaultValidators from 'elegant-validator/src/defaultValidators'
+import defaultMessagesEn from 'elegant-validator/src/defaultMessagesEn'
 
 // you may define few instances (services) for various application features
-const ev = new ElegantValidator(defaultValidators) 
+const ev = new ElegantValidator(defaultValidators, defaultMessagesEn) 
 
 // define schema for some use case
 const schema = { email: ['required', 'email', 'length:7:255'], name: 'length:3:255' }
@@ -38,26 +39,24 @@ const { errors, errorsArray, isValid } = await ev.isValid(formData, schema)
 # Schema
 Schema is a map of validation rules to be applied.
 
-## Schema -> String
+## String rule
 ```
 const schema = { email: 'required' }
 ```
 
-## Schema -> Array of strings
+## Multiple rules
 So 3 validations will be checked here. Two parameters (7, 255) are being used by length validator 
 ```
 const schema = { email: ['required', 'email', 'length:7:255'] }
 ```
 
-## Schema -> Object/Array of objects
+## More options for a rule
 For more complex cases string is not enough. So let's use objects
 ```
-const schema = { email: { name: 'length', params: [7, 255], message: 'Email length must be 7-255 symbols' } }
-// or in combination:
 const schema = { email: ['required', { name: 'length', params: [7, 255], message: 'Email length must be 7-255 symbols' }] }
 ```
 
-## Schema -> Function/Array of functions
+## Custom rules
 Tough case? OK - return undefined on success, return message/object on error
 ```
 const myEmailValidationRule = ({ value }) => {
@@ -65,12 +64,10 @@ const myEmailValidationRule = ({ value }) => {
     return 'Email is invalid'
   }
 }
-const schema = { email: myEmailValidationRule }
-// or in combination:
 const schema = { email: ['required', myEmailValidationRule] }
 ```
 
-## Schema -> hasMany
+## Nested Array
 In this example we ensure position has valid technologies count and schema: 
 ```
 const ev = new ElegantValidator(defaultValidators) 
@@ -89,7 +86,7 @@ const formData = {
 const { isValid, errors } = await ev.isValid(formData, positionSchema)
 ```
 
-## Schema -> hasOne
+## Nested Object
 Pretty the same as hasMany but for a single item references:
 ```
 const ev = new ElegantValidator(defaultValidators) 
@@ -110,9 +107,9 @@ const formData = {
 const { isValid, errors } = await ev.isValid(formData, checkoutSchema)
 ```
 
-# Customizing
+# Custom rule (function) reference
 
-## Customizing -> validator parameters reference
+## Input Arguments
 ```
 value - Any - value taken from the field is being validating right now
 params - Array<Any> - parameters provided by schema definition for this field/value
@@ -124,7 +121,7 @@ context.rootResource - Object - the root formData object. Constant across all va
 context.itemIndex - Number - index of currently validating item from hasMany collection. 
 ```
 
-## Customizing -> validator as a function
+#### Function Example
 ```
 const ev = new ElegantValidator(defaultValidators) 
 const myFooValidator = ({ value, params, resource, fieldName, message, context }) => {
@@ -138,7 +135,7 @@ const { errors, errorsArray, isValid } = await ev.isValid(formData, schema)
 // errors => { name: 'Foo is missing...' }
 ```
 
-## Customizing -> registered validator
+#### Register to use just a rule name (optional)
 ```
 const myFooValidator = ({ value, params, resource, fieldName, message, context }) => {
   if (!JSON.stringify(resource).includes('foo')) {
@@ -158,7 +155,7 @@ const { errors, errorsArray, isValid } = await ev.isValid(formData, schema)
 
 # Examples
 
-## Examples -> complex forms with deeply nested resources
+## Complex Form with deeply nested resources
 ```
 const form = {
     resources: [
@@ -197,3 +194,5 @@ const { errors } = await resourceValidator.isValid(form, schema);
 
 expect(errors['resources[0].posts[0].comments[0].author.id']).toEqual(['Required'])
 ```
+Here you can use the error key `resources[0].posts[0].comments[0].author.id` in UI to check/render the error messages.
+

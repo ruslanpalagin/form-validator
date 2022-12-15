@@ -3,4 +3,5 @@ module.exports = {
     ...require('./email'),
     ...require('./length'),
     ...require('./arrayLength'),
+    ...require('./isNumeric'),
 }
