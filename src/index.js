@@ -75,6 +75,9 @@ class Ev {
         return async ({ value, fieldName, context }) => {
             const resources = value;
             let allErrors = [];
+            if (!resources) {
+                return allErrors;
+            }
             for (let i = 0; i < resources.length; i += 1) {
                 const resource = resources[i];
                 const itemContext = { ...context, itemIndex: i }
